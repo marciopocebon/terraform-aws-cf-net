@@ -4,109 +4,12 @@ provider "aws" {
 	region = "${var.aws_region}"
 }
 
-# CF-specific subnets
-
-resource "aws_subnet" "lb" {
-	vpc_id = "${var.aws_vpc_id}"
-	cidr_block = "${var.network}.${var.offset}2.0/24"
-	availability_zone = "${var.aws_subnet_cfruntime-2a_availability_zone}"
-	tags {
-		Name = "lb"
-	}
-}
-
-output "aws_subnet_lb_id" {
-  value = "${aws_subnet.lb.id}"
-}
-
-output "aws_subnet_lb_availability_zone" {
-  value = "${var.aws_subnet_cfruntime-2a_availability_zone}"
-}
-
-# Routing table for public subnets
-
-resource "aws_route_table" "public" {
-	vpc_id = "${var.aws_vpc_id}"
-
-	route {
-		cidr_block = "0.0.0.0/0"
-		gateway_id = "${var.aws_internet_gateway_id}"
-	}
-}
-
-resource "aws_route_table_association" "lb-public" {
-	subnet_id = "${aws_subnet.lb.id}"
-	route_table_id = "${var.aws_route_table_public_id}"
-}
-
-# Private subsets
-
 resource "aws_subnet" "cfruntime-2a" {
 	vpc_id = "${var.aws_vpc_id}"
 	cidr_block = "${var.network}.${var.offset}3.0/24"
-	availability_zone = "${var.aws_subnet_cfruntime-2a_availability_zone}"
 	tags {
 		Name = "cf1"
 	}
-}
-
-output "aws_subnet_cfruntime-2a_id" {
-  value = "${aws_subnet.cfruntime-2a.id}"
-}
-
-output "aws_subnet_cfruntime-2a_availability_zone" {
-  value = "${aws_subnet.cfruntime-2a.availability_zone}"
-}
-
-resource "aws_subnet" "cfruntime-2b" {
-	vpc_id = "${var.aws_vpc_id}"
-	cidr_block = "${var.network}.${var.offset}4.0/24"
-	availability_zone = "${var.aws_subnet_cfruntime-2b_availability_zone}"
-	tags {
-		Name = "cf2"
-	}
-}
-
-output "aws_subnet_cfruntime-2b_id" {
-  value = "${aws_subnet.cfruntime-2b.id}"
-}
-
-output "aws_subnet_cfruntime-2b_availability_zone" {
-  value = "${aws_subnet.cfruntime-2b.availability_zone}"
-}
-
-resource "aws_subnet" "docker" {
-	vpc_id = "${var.aws_vpc_id}"
-	cidr_block = "${var.network}.${var.offset}5.0/24"
-	availability_zone = "${aws_subnet.lb.availability_zone}"
-	tags {
-		Name = "docker"
-	}
-}
-
-output "aws_subnet_docker_id" {
-  value = "${aws_subnet.docker.id}"
-}
-
-output "aws_subnet_docker_availability_zone" {
-  value = "${aws_subnet.docker.availability_zone}"
-}
-
-# Routing table for private subnets
-
-resource "aws_route_table_association" "cfruntime-2a-private" {
-	subnet_id = "${aws_subnet.cfruntime-2a.id}"
-	route_table_id = "${var.aws_route_table_private_id}"
-}
-
-resource "aws_route_table_association" "cfruntime-2b-private" {
-	subnet_id = "${aws_subnet.cfruntime-2b.id}"
-	route_table_id = "${var.aws_route_table_private_id}"
-}
-
-resource "aws_route_table_association" "docker" {
-	subnet_id = "${aws_subnet.docker.id}"
-	route_table_id = "${var.aws_route_table_private_id}"
 }
 
 resource "aws_security_group" "cf" {
@@ -201,13 +104,4 @@ output "aws_eip_cf_public_ip" {
 
 output "aws_cf_a_cidr" {
   value = "${aws_subnet.cfruntime-2a.cidr_block}"
-}
-output "aws_cf_b_cidr" {
-  value = "${aws_subnet.cfruntime-2b.cidr_block}"
-}
-output "aws_lb_cidr" {
-  value = "${aws_subnet.lb.cidr_block}"
-}
-output "aws_docker_cidr" {
-  value = "${aws_subnet.docker.cidr_block}"
 }
