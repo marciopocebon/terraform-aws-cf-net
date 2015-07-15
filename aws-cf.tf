@@ -12,6 +12,10 @@ resource "aws_subnet" "cfruntime-2a" {
 	}
 }
 
+output "aws_subnet_cfruntime-2a_id" {
+  value = "${aws_subnet.cfruntime-2a.id}"
+}
+
 resource "aws_security_group" "cf" {
 	name = "cf-${var.offset}-${var.aws_vpc_id}"
 	description = "CF security groups"
